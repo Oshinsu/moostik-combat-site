@@ -1,0 +1,22 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
+  "headers": [
+    {
+      "source": "/.well-known/assetlinks.json",
+      "headers": [{ "key": "Content-Type", "value": "application/json" }]
+    },
+    {
+      "source": "/play/(.*).wasm",
+      "headers": [{ "key": "Content-Type", "value": "application/wasm" }]
+    },
+    {
+      "source": "/play/index.pck",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800, must-revalidate" }]
+    },
+    {
+      "source": "/play/(.*).wasm",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800, must-revalidate" }]
+    }
+  ]
+}

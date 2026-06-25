@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Moostik Combat — le jeu de baston de l'univers Bloodwings</title>
+<meta name="description" content="Moostik Combat : jeu de baston 2D nerveux dans l'univers Moostik / Bloodwings. Jouable au navigateur, multijoueur en ligne, installable. Premier studio de jeu vidéo indé de Martinique.">
+<meta name="theme-color" content="#0d0710">
+<link rel="icon" href="img/icon.png" type="image/png">
+<link rel="apple-touch-icon" href="img/icon.png">
+<meta property="og:title" content="Moostik Combat">
+<meta property="og:description" content="Jeu de baston 2D de l'univers Bloodwings — jouable au navigateur, multijoueur en ligne. Studio indé de Martinique.">
+<meta property="og:image" content="img/icon.png">
+<meta property="og:type" content="website">
+<style>
+  :root{
+    --bg:#0b0610; --bg2:#160a1d; --panel:#1a0c16;
+    --blood:#c4151c; --blood-d:#88121a; --gold:#d8af44; --bone:#f4e9d8;
+    --muted:#a8949c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;
+    background:var(--bg); color:var(--bone); line-height:1.55;
+    overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+  .btn{
+    display:inline-block;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+    padding:16px 34px;border-radius:10px;cursor:pointer;border:none;font-size:1.02rem;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-play{
+    background:linear-gradient(160deg,var(--blood),var(--blood-d));color:#fff;
+    box-shadow:0 8px 28px rgba(196,21,28,.45), inset 0 1px 0 rgba(255,255,255,.25);
+  }
+  .btn-play:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(196,21,28,.6)}
+  .btn-ghost{background:transparent;color:var(--bone);border:1.5px solid rgba(216,175,68,.5)}
+  .btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+
+  /* ---- HERO ---- */
+  header.hero{
+    position:relative;min-height:100svh;display:flex;align-items:center;
+    background:
+      radial-gradient(120% 90% at 75% 20%, rgba(196,21,28,.28), transparent 55%),
+      radial-gradient(100% 80% at 20% 90%, rgba(120,20,90,.22), transparent 60%),
+      linear-gradient(180deg,#0b0610,#160a1d 70%,#0b0610);
+    overflow:hidden;
+  }
+  .hero-grid{display:grid;grid-template-columns:1.2fr .9fr;gap:24px;align-items:center;width:100%}
+  .eyebrow{color:var(--gold);font-weight:800;letter-spacing:.22em;text-transform:uppercase;font-size:.78rem;margin-bottom:18px;opacity:.92}
+  h1{
+    font-size:clamp(2.6rem,7vw,5.2rem);line-height:.95;font-weight:900;letter-spacing:-.01em;
+    text-shadow:0 2px 0 #000, 0 0 40px rgba(196,21,28,.35);
+  }
+  h1 .blood{color:var(--blood)}
+  .tagline{font-size:clamp(1.05rem,2.4vw,1.4rem);color:var(--bone);opacity:.92;margin:18px 0 8px;max-width:30ch}
+  .cta{display:flex;gap:14px;flex-wrap:wrap;margin-top:28px}
+  .hero-art{position:relative;display:flex;justify-content:center}
+  .hero-art img{width:min(420px,80%);filter:drop-shadow(0 30px 50px rgba(0,0,0,.6));animation:float 5s ease-in-out infinite}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+  .scroll-hint{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);color:var(--muted);font-size:.8rem;letter-spacing:.12em}
+
+  /* ---- chips ---- */
+  .chips{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+  .chip{background:rgba(255,255,255,.04);border:1px solid rgba(216,175,68,.18);border-radius:999px;padding:9px 16px;font-size:.86rem;font-weight:600}
+  .chip b{color:var(--gold)}
+
+  /* ---- sections ---- */
+  section{padding:72px 0;position:relative}
+  .sec-title{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:900;margin-bottom:8px}
+  .sec-sub{color:var(--muted);margin-bottom:34px;max-width:60ch}
+  .roster{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+  .card{
+    background:linear-gradient(180deg,rgba(196,21,28,.10),rgba(0,0,0,.3));
+    border:1px solid rgba(216,175,68,.16);border-radius:14px;padding:14px;width:160px;text-align:center;
+    transition:transform .18s ease,border-color .18s ease;
+  }
+  .card:hover{transform:translateY(-6px);border-color:rgba(216,175,68,.5)}
+  .card img{width:100%;height:170px;object-fit:contain;object-position:bottom}
+  .card .nm{margin-top:8px;font-weight:800;letter-spacing:.04em;color:var(--gold);font-size:.95rem}
+
+  .story{background:linear-gradient(180deg,#0b0610,#160a1d);border-top:1px solid rgba(216,175,68,.12);border-bottom:1px solid rgba(216,175,68,.12)}
+  .story .wrap{max-width:760px;text-align:center}
+  .story p{color:var(--bone);opacity:.9;font-size:1.08rem;margin-top:14px}
+  .flag{font-size:1.4rem}
+
+  .feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-top:14px}
+  .feat .f{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:20px}
+  .feat .f .ic{font-size:1.6rem}
+  .feat .f h3{margin:8px 0 4px;font-size:1.05rem}
+  .feat .f p{color:var(--muted);font-size:.92rem}
+
+  .final{text-align:center;background:radial-gradient(80% 120% at 50% 0%,rgba(196,21,28,.22),transparent 60%)}
+
+  footer{border-top:1px solid rgba(216,175,68,.14);padding:34px 0;color:var(--muted);font-size:.85rem}
+  footer .wrap{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:center}
+  footer a:hover{color:var(--gold)}
+  .legal{font-size:.78rem;opacity:.7;margin-top:10px}
+
+  @media(max-width:760px){
+    .hero-grid{grid-template-columns:1fr;text-align:center}
+    .hero-art{order:-1}.hero-art img{width:min(280px,62%)}
+    .cta,.chips{justify-content:center}
+    .tagline{margin-left:auto;margin-right:auto}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">Univers Moostik · Bloodwings</div>
+      <h1>MOOSTIK<br><span class="blood">COMBAT</span></h1>
+      <p class="tagline">Un jeu de baston 2D nerveux. Des moustiks. Du sang. Joue-le maintenant dans ton navigateur.</p>
+      <div class="cta">
+        <a class="btn btn-play" href="play/">▶ Jouer maintenant</a>
+        <a class="btn btn-ghost" href="#roster">Voir les combattants</a>
+      </div>
+      <div class="chips">
+        <span class="chip">⚔️ Combos &amp; ultimes</span>
+        <span class="chip">🌐 <b>Multijoueur en ligne</b></span>
+        <span class="chip">📱 Installable (PWA)</span>
+        <span class="chip">🆓 Gratuit</span>
+      </div>
+    </div>
+    <div class="hero-art"><img src="img/hero_koko.png" alt="Koko, combattant moostik"></div>
+  </div>
+  <div class="scroll-hint">↓ défile</div>
+</header>
+
+<section id="roster">
+  <div class="wrap" style="text-align:center">
+    <h2 class="sec-title">Le roster</h2>
+    <p class="sec-sub" style="margin-left:auto;margin-right:auto">Cinq moustiks, cinq styles. Issus de l'univers Bloodwings.</p>
+    <div class="roster">
+      <div class="card"><img src="img/icon.png" alt="Koko" style="border-radius:10px;height:160px;object-fit:cover"><div class="nm">KOKO</div></div>
+      <div class="card"><img src="img/p_evilpik.png" alt="Evil-Pik"><div class="nm">EVIL-PIK</div></div>
+      <div class="card"><img src="img/p_maeli.png" alt="Maeli"><div class="nm">MAELI</div></div>
+      <div class="card"><img src="img/p_taitik.png" alt="Taitik"><div class="nm">TAITIK</div></div>
+      <div class="card"><img src="img/p_topatik.png" alt="Topatik"><div class="nm">TOPATIK</div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2 class="sec-title">Ce qui t'attend</h2>
+    <div class="feat">
+      <div class="f"><div class="ic">🥊</div><h3>Baston nerveuse</h3><p>Sprint, esquives, combos, body-check, envoi valser, ultimes cinématiques.</p></div>
+      <div class="f"><div class="ic">🌐</div><h3>En ligne</h3><p>Crée un salon, partage le lien, et combats un ami en P2P (ou match rapide).</p></div>
+      <div class="f"><div class="ic">📱</div><h3>Web &amp; mobile</h3><p>Jouable au navigateur, sans téléchargement. Installable sur l'écran d'accueil, jouable hors-ligne.</p></div>
+      <div class="f"><div class="ic">🩸</div><h3>Direction artistique</h3><p>L'univers Bloodwings : sombre, gothique, créole. Chaque goutte de sang est une prière.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="story">
+  <div class="wrap">
+    <div class="flag">🇲🇶</div>
+    <h2 class="sec-title">Né en Martinique</h2>
+    <p>Moostik Combat est développé par <b>BYSS GROUP</b>, studio de Fort-de-France — l'un des premiers à créer un jeu de baston indé en Martinique. Un univers caribéen, codé sur place, jouable partout dans le monde.</p>
+  </div>
+</section>
+
+<section class="final">
+  <div class="wrap">
+    <h2 class="sec-title">Prêt à te battre ?</h2>
+    <p class="sec-sub" style="margin:8px auto 26px">Aucune installation. Un clic et c'est parti.</p>
+    <a class="btn btn-play" href="play/">▶ Jouer maintenant</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>
+      © <span id="y"></span> <b>BYSS GROUP</b> — Moostik Combat
+      <div class="legal">BYSS GROUP — SASU au capital de 500 € · RCS Fort-de-France 103&nbsp;443&nbsp;719 · Fort-de-France (972)</div>
+    </div>
+    <div>
+      <a href="play/">Jouer</a> &nbsp;·&nbsp;
+      <a href="mentions-legales.html">Mentions légales</a> &nbsp;·&nbsp;
+      <a href="privacy.html">Confidentialité</a>
+    </div>
+  </div>
+</footer>
+
+<script>document.getElementById('y').textContent=new Date().getFullYear();</script>
+</body>
+</html>
